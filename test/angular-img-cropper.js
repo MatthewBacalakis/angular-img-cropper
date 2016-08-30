@@ -9,11 +9,14 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
             touchRadius: "=",
             cropAreaBounds: "=",
             minWidth: "=",
-            minHeight: "="
+            minHeight: "=",
+            fileType: '<',
+            quality: '<'
         },
         restrict: "A",
         link: function (scope, element, attrs) {
             var crop;
+            var allowedFileType = ['png', 'jpg'];
             var __extends = __extends || function (d, b) {
                     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
                     function __() {
@@ -347,10 +350,11 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     this.keepAspect = false;
                     this.aspectRatio = 0;
                     this.currentDragTouches = new Array();
+                    this.compressionRatio = scope.quality;
                     this.isMouseDown = false;
                     this.ratioW = 1;
                     this.ratioH = 1;
-                    this.fileType = 'png';
+                    this.fileType = 'jpg';
                     this.imageSet = false;
                     this.pointPool = new PointPool(200);
                     CropService.init(canvas);
@@ -870,6 +874,10 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     if (fileType == 'png' || fileType == 'jpg') {
                         this.fileType = fileType;
                     }
+                    if(typeof scope.fileType === "string" && allowedFileType.indexOf(scope.fileType) != -1)
+                        this.fileType = scope.fileType;
+                    if(this.fileType === 'jpg')
+                        this.fileType = 'jpeg';
                     this.srcImage = img;
                     this.updateClampBounds();
                     var sourceAspect = this.srcImage.height / this.srcImage.width;
@@ -1007,7 +1015,10 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                         this.croppedImage.width = this.cropCanvas.width;
                         this.croppedImage.height = this.cropCanvas.height;
                     }
-                    this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType);
+                    if(this.fileType == 'jpeg')
+                        this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType, this.compressionRatio);
+                    else
+                        this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType);
                     return this.croppedImage;
                 };
                 ImageCropper.prototype.getBounds = function () {
