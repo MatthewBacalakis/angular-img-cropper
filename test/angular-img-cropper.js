@@ -429,7 +429,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                             this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height, 0, this.buffer.height / 2 - h / 2, w, h);
                         }
                         this.buffer.getContext('2d').drawImage(this.canvas, 0, 0, this.canvasWidth, this.canvasHeight);
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                        ctx.fillStyle = "rgba(0, 0, 0, 0)";
                         ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
                         ctx.drawImage(this.buffer, bounds.left, bounds.top, Math.max(bounds.getWidth(), 1), Math.max(bounds.getHeight(), 1), bounds.left, bounds.top, bounds.getWidth(), bounds.getHeight());
                         var marker;
