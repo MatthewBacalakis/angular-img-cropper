@@ -11,7 +11,8 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
             minWidth: "=",
             minHeight: "=",
             fileType: '<',
-            quality: '<'
+            quality: '<',
+            verticalSquash: '<'
         },
         restrict: "A",
         link: function (scope, element, attrs) {
@@ -964,8 +965,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
 
                       this.center.setPosition(bounds.left+bounds.getWidth()/2, bounds.top+bounds.getHeight()/2);
                     }
-
-                    this.vertSquashRatio = this.detectVerticalSquash(this.srcImage);
+                    this.vertSquashRatio = (scope.verticalSquash) ? this.detectVerticalSquash(this.srcImage) : 1;
                     this.draw(this.ctx);
                     var croppedImg = this.getCroppedImage(scope.cropWidth, scope.cropHeight);
                     if(attrs.croppedImage !== undefined) {
