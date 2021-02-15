@@ -9,11 +9,15 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
             touchRadius: "=",
             cropAreaBounds: "=",
             minWidth: "=",
-            minHeight: "="
+            minHeight: "=",
+            fileType: '<',
+            quality: '<',
+            verticalSquash: '<'
         },
         restrict: "A",
         link: function (scope, element, attrs) {
             var crop;
+            var allowedFileType = ['png', 'jpg'];
             var __extends = __extends || function (d, b) {
                     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
                     function __() {
@@ -347,10 +351,11 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     this.keepAspect = false;
                     this.aspectRatio = 0;
                     this.currentDragTouches = new Array();
+                    this.compressionRatio = scope.quality;
                     this.isMouseDown = false;
                     this.ratioW = 1;
                     this.ratioH = 1;
-                    this.fileType = 'png';
+                    this.fileType = 'jpg';
                     this.imageSet = false;
                     this.pointPool = new PointPool(200);
                     CropService.init(canvas);
@@ -425,7 +430,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                             this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height, 0, this.buffer.height / 2 - h / 2, w, h);
                         }
                         this.buffer.getContext('2d').drawImage(this.canvas, 0, 0, this.canvasWidth, this.canvasHeight);
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                        ctx.fillStyle = "rgba(0, 0, 0, 0)";
                         ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
                         ctx.drawImage(this.buffer, bounds.left, bounds.top, Math.max(bounds.getWidth(), 1), Math.max(bounds.getHeight(), 1), bounds.left, bounds.top, bounds.getWidth(), bounds.getHeight());
                         var marker;
@@ -870,6 +875,10 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     if (fileType == 'png' || fileType == 'jpg') {
                         this.fileType = fileType;
                     }
+                    if(typeof scope.fileType === "string" && allowedFileType.indexOf(scope.fileType) != -1)
+                        this.fileType = scope.fileType;
+                    if(this.fileType === 'jpg')
+                        this.fileType = 'jpeg';
                     this.srcImage = img;
                     this.updateClampBounds();
                     var sourceAspect = this.srcImage.height / this.srcImage.width;
@@ -956,8 +965,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
 
                       this.center.setPosition(bounds.left+bounds.getWidth()/2, bounds.top+bounds.getHeight()/2);
                     }
-
-                    this.vertSquashRatio = this.detectVerticalSquash(this.srcImage);
+                    this.vertSquashRatio = (scope.verticalSquash) ? this.detectVerticalSquash(this.srcImage) : 1;
                     this.draw(this.ctx);
                     var croppedImg = this.getCroppedImage(scope.cropWidth, scope.cropHeight);
                     if(attrs.croppedImage !== undefined) {
@@ -1007,7 +1015,10 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                         this.croppedImage.width = this.cropCanvas.width;
                         this.croppedImage.height = this.cropCanvas.height;
                     }
-                    this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType);
+                    if(this.fileType == 'jpeg')
+                        this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType, this.compressionRatio);
+                    else
+                        this.croppedImage.src = this.cropCanvas.toDataURL("image/" + this.fileType);
                     return this.croppedImage;
                 };
                 ImageCropper.prototype.getBounds = function () {
